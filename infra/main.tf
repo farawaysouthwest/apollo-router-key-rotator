@@ -17,9 +17,8 @@ resource "google_secret_manager_secret" "supergraph_api_key" {
   secret_id = upper("${var.graph_variant}_supergraph_api_key")
 
   labels = {
-    environment = var.graph_variant
+    graph_variant = var.graph_variant
   }
-
   replication {
     automatic = true
   }
@@ -43,7 +42,7 @@ resource "google_cloudfunctions_function" "main" {
   entry_point                  = "main"
   service_account_email        = "serviceAccount:${google_service_account.key-rotator.email}"
   labels = {
-    my-label = var.graph_variant
+    graph_variant = var.graph_variant
   }
 
   environment_variables = {
