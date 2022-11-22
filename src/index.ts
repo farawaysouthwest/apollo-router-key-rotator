@@ -22,7 +22,7 @@ const apolloService = new ApolloService({
 export async function main(req: Request, res: Response) {
   try {
     // create new key and load to key valt.
-    const version = await keyStore.rotatekey();
+    const version = await keyStore.rotateKey();
 
     // send new key to Apollo.
     if (version) {

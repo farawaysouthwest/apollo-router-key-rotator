@@ -10,7 +10,7 @@ export default class KeyStore {
     this.secretName = secretName;
   }
 
-  public async rotatekey() {
+  public async rotateKey() {
     try {
       // generate new key value.
       const key = generateKey();
