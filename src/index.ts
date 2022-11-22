@@ -37,7 +37,10 @@ export async function main(req: Request, res: Response) {
           RouterSecret: status,
         });
       }
+
+      if (!secretData) throw new Error("error creating secret");
     }
+    if (!version) throw new Error("error creating secret");
   } catch (error) {
     console.error(error);
     res.status(500).send((error as Error).message);
