@@ -1,7 +1,8 @@
 
 provider "google" {
-  region = "us-central1"
-  zone   = "us-central1-c"
+  project = "hermesengine"
+  region  = "us-central1"
+  zone    = "us-central1-c"
 }
 resource "google_service_account" "key-rotator" {
   account_id = "key-rotator"
@@ -24,11 +25,46 @@ resource "google_secret_manager_secret" "supergraph_api_key" {
   }
 }
 
-resource "google_secret_manager_secret_iam_member" "supergraph_api_key_grant" {
+resource "google_secret_manager_secret" "apollo_key" {
+  secret_id = "APOLLO_KEY"
+  replication {
+    automatic = true
+  }
+}
+
+resource "google_storage_bucket" "bucket" {
+  name     = "${var.graph_variant}-apollo-router-key-rotator"
+  location = "US"
+}
+resource "google_storage_bucket_object" "archive" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "../function-source.zip"
+}
+
+resource "google_secret_manager_secret_iam_member" "supergraph_api_key_grant_manager" {
+  secret_id = google_secret_manager_secret.supergraph_api_key.id
+  role      = "roles/secretmanager.secretVersionManager"
+  member    = "serviceAccount:${google_service_account.key-rotator.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "supergraph_api_key_grant_accessor" {
   secret_id = google_secret_manager_secret.supergraph_api_key.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.key-rotator.email}"
 }
+
+resource "google_secret_manager_secret_iam_member" "apollo_key_grant" {
+  secret_id = google_secret_manager_secret.apollo_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.key-rotator.email}"
+}
+
+resource "google_secret_manager_secret_version" "apollo_key" {
+  secret      = google_secret_manager_secret.apollo_key.id
+  secret_data = var.apollo_key
+}
+
 
 resource "google_cloudfunctions_function" "main" {
   name        = "${var.graph_variant}-apollo-router-key-rotator"
@@ -36,22 +72,30 @@ resource "google_cloudfunctions_function" "main" {
   runtime     = "nodejs16"
 
   available_memory_mb          = 256
+  source_archive_bucket        = google_storage_bucket.bucket.name
+  source_archive_object        = google_storage_bucket_object.archive.name
   trigger_http                 = true
   https_trigger_security_level = "SECURE_ALWAYS"
   timeout                      = 60
   entry_point                  = "main"
-  service_account_email        = "serviceAccount:${google_service_account.key-rotator.email}"
-  labels = {
-    graph_variant = var.graph_variant
-  }
-
+  service_account_email        = google_service_account.key-rotator.email
   environment_variables = {
     APOLLO_API_URI = "https://graphql.api.apollographql.com/api/graphql"
-    APOLLO_KEY     = var.apollo_key
     GRAPH_ID       = var.graph_id
     GRAPH_VARIANT  = var.graph_variant
     SECRET_NAME    = google_secret_manager_secret.supergraph_api_key.name
   }
+  secret_environment_variables {
+    key     = "APOLLO_KEY"
+    secret  = google_secret_manager_secret.apollo_key.secret_id
+    version = google_secret_manager_secret_version.apollo_key.version
+  }
+
+
+  labels = {
+    graph_variant = var.graph_variant
+  }
+
 }
 
 # IAM entry for a single user to invoke the function
@@ -75,7 +119,7 @@ resource "google_cloud_scheduler_job" "job" {
     http_method = "GET"
     uri         = google_cloudfunctions_function.main.https_trigger_url
 
-    oauth_token {
+    oidc_token {
       service_account_email = google_service_account.key-rotator.email
     }
   }

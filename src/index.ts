@@ -21,24 +21,20 @@ const apolloService = new ApolloService({
 
 export async function main(req: Request, res: Response) {
   try {
-    // create new key and load to key valt.
+    // create new key and load to key vault.
     const version = await keyStore.rotateKey();
 
     // send new key to Apollo.
     if (version) {
-      const secretData = await keyStore.getKey(version);
+      console.log(`version: ${version}`);
 
-      if (secretData) {
-        const status = await apolloService.setSupergraphKey({
-          secrets: [{name: "SUPERGRAPH_API_KEY", value: secretData.toString()}],
-        });
+      const status = await apolloService.setSupergraphKey({
+        secrets: [{name: "SUPERGRAPH_API_KEY", value: version}],
+      });
 
-        res.status(200).send({
-          RouterSecret: status,
-        });
-      }
-
-      if (!secretData) throw new Error("error creating secret");
+      res.status(200).send({
+        RouterSecret: status,
+      });
     }
     if (!version) throw new Error("error creating secret");
   } catch (error) {

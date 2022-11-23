@@ -57,8 +57,10 @@ export default class ApolloService {
    * Send supergraph key to Apollo Router
    */
   public async setSupergraphKey(key: SecretsInput) {
+    console.log(`### key: ${key.secrets[0].value}`);
+
     return await this.client.request<OrderStatus>(setRouterSecretQuery, {
-      id: this.graphId,
+      graphId: this.graphId,
       name: this.graphVariant,
       input: key,
     });

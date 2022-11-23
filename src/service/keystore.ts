@@ -22,24 +22,7 @@ export default class KeyStore {
       });
 
       // return full version name
-      return version.name || null;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  }
-
-  public async getKey(secretVersion: string) {
-    try {
-      // get secret value.
-      const [version] = await this.keyClient.accessSecretVersion({
-        name: secretVersion,
-      });
-
-      // return payload.
-      if (version.payload?.data) return version.payload?.data;
-
-      return null;
+      return key;
     } catch (error) {
       console.error(error);
       return null;

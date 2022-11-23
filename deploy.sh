@@ -1,0 +1,1 @@
+gcloud functions deploy main-apollo-router-key-rotator --source=.
