@@ -39,6 +39,15 @@ resource "random_string" "bucketSufix" {
   lower   = true
 }
 
+resource "null_resource" "create_zip_file" {
+
+  provisioner "local-exec" {
+
+    command = "/bin/bash build.sh"
+  }
+}
+
+
 resource "google_storage_bucket" "bucket" {
   name     = "${var.graph_variant}-router-key-rotator-${random_string.bucketSufix.result}"
   location = "US"
@@ -46,7 +55,7 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "archive" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "../function-source.zip"
+  source = "./function-source.zip"
 }
 
 resource "google_secret_manager_secret_iam_member" "supergraph_api_key_grant_manager" {
