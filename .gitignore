@@ -1,4 +1,9 @@
 .env
+dist
 node_modules
 infra/.terraform
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
 function-source.zip
+infra/terraform.tfstate.backup
+infra/terraform.tfstate

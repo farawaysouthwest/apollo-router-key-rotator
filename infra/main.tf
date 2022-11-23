@@ -1,6 +1,6 @@
 
 provider "google" {
-  project = "hermesengine"
+  project = "secure-subgraph"
   region  = "us-central1"
   zone    = "us-central1-c"
 }
@@ -32,8 +32,15 @@ resource "google_secret_manager_secret" "apollo_key" {
   }
 }
 
+resource "random_string" "bucketSufix" {
+  length  = 8
+  special = false
+  upper   = false
+  lower   = true
+}
+
 resource "google_storage_bucket" "bucket" {
-  name     = "${var.graph_variant}-apollo-router-key-rotator"
+  name     = "${var.graph_variant}-router-key-rotator-${random_string.bucketSufix.result}"
   location = "US"
 }
 resource "google_storage_bucket_object" "archive" {
@@ -71,7 +78,9 @@ resource "google_cloudfunctions_function" "main" {
   description = "Creates and rotates secure api keys for communication between cloud router and subgraphs."
   runtime     = "nodejs16"
 
-  available_memory_mb          = 256
+  available_memory_mb          = 128
+  max_instances                = 2
+  min_instances                = 0
   source_archive_bucket        = google_storage_bucket.bucket.name
   source_archive_object        = google_storage_bucket_object.archive.name
   trigger_http                 = true

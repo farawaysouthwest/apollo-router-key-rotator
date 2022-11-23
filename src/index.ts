@@ -26,8 +26,6 @@ export async function main(req: Request, res: Response) {
 
     // send new key to Apollo.
     if (version) {
-      console.log(`version: ${version}`);
-
       const status = await apolloService.setSupergraphKey({
         secrets: [{name: "SUPERGRAPH_API_KEY", value: version}],
       });

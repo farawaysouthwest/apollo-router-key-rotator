@@ -1,8 +1,7 @@
 {
-  "main": "./dist/index.js",
+  "main": "index.js",
   "scripts": {
     "dev": "npm run build && export $(cat .env | xargs) && functions-framework --target=main",
-    "zip": "zip -r function-source.zip .",
     "deploy": "npm run build && sh deploy.sh",
     "build": "tsc",
     "test": "mocha --config .mocharc.json src/test/*.test.ts"
