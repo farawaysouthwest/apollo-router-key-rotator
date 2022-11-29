@@ -33,8 +33,11 @@ export async function main(req: Request, res: Response) {
       res.status(200).send({
         RouterSecret: status,
       });
+      return;
     }
-    if (!version) throw new Error("error creating secret");
+
+    // throw error if key can't be created.
+    throw new Error("error creating secret");
   } catch (error) {
     console.error(error);
     res.status(500).send((error as Error).message);
