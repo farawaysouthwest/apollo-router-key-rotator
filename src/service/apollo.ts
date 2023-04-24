@@ -1,5 +1,6 @@
-import {GraphQLClient} from "graphql-request";
-import {setRouterSecretQuery} from "../libs/graphql";
+import { GraphQLClient } from "graphql-request";
+import { setRouterSecretQuery } from "../libs/graphql";
+import { OrderStatus, SecretInput } from "../libs/operations-types";
 
 /// Types ///
 interface ApolloServiceOptions {
@@ -7,26 +8,6 @@ interface ApolloServiceOptions {
   apolloKey: string;
   graphId: string;
   graphVariant: string;
-}
-
-interface SecretsInput {
-  secrets: [
-    {
-      name: string;
-      value: string;
-    }
-  ];
-}
-interface OrderStatus {
-  order: OrderStatusEnum;
-}
-
-enum OrderStatusEnum {
-  PENDING,
-  COMPLETED,
-  ROLLING_BACK,
-  ERRORED,
-  SUPERSEDED,
 }
 
 /// Service Class ///
@@ -56,7 +37,7 @@ export default class ApolloService {
   /**
    * Send supergraph key to Apollo Router
    */
-  public async setSupergraphKey(key: SecretsInput) {
+  public async setSupergraphKey(key: SecretInput) {
     return await this.client.request<OrderStatus>(setRouterSecretQuery, {
       graphId: this.graphId,
       name: this.graphVariant,

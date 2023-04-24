@@ -1,5 +1,5 @@
-import {SecretManagerServiceClient} from "@google-cloud/secret-manager";
-import {Request, Response} from "@google-cloud/functions-framework";
+import { SecretManagerServiceClient } from "@google-cloud/secret-manager";
+import { Request, Response } from "@google-cloud/functions-framework";
 import ApolloService from "./service/apollo";
 import KeyStore from "./service/keystore";
 
@@ -27,7 +27,8 @@ export async function main(req: Request, res: Response) {
     // send new key to Apollo.
     if (version) {
       const status = await apolloService.setSupergraphKey({
-        secrets: [{name: "SUPERGRAPH_API_KEY", value: version}],
+        name: "SUPERGRAPH_API_KEY",
+        value: version,
       });
 
       res.status(200).send({

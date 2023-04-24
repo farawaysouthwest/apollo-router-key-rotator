@@ -1,18 +1,19 @@
-import {gql} from "graphql-request";
+import { gql } from "graphql-request";
 
 export const setRouterSecretQuery = gql`
-  mutation SetSecrets(
-    $input: RouterSecretsInput!
-    $name: String!
+  mutation setSecrets(
     $graphId: ID!
+    $name: String!
+    $input: RouterSecretsInput!
   ) {
     graph(id: $graphId) {
       variant(name: $name) {
         router {
           setSecrets(input: $input) {
             ... on RouterSecretsSuccess {
-              order {
-                status
+              secrets {
+                createdAt
+                name
               }
             }
           }
