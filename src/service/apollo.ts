@@ -1,6 +1,11 @@
 import { GraphQLClient } from "graphql-request";
 import { setRouterSecretQuery } from "../libs/graphql";
-import { OrderStatus, SecretInput } from "../libs/operations-types";
+import {
+  OrderStatus,
+  SecretInput,
+  RouterMutationSetSecretsArgs,
+  RouterSecretsSuccess,
+} from "../libs/operations-types";
 
 /// Types ///
 interface ApolloServiceOptions {
@@ -38,10 +43,15 @@ export default class ApolloService {
    * Send supergraph key to Apollo Router
    */
   public async setSupergraphKey(key: SecretInput) {
-    return await this.client.request<OrderStatus>(setRouterSecretQuery, {
-      graphId: this.graphId,
-      name: this.graphVariant,
-      input: key,
-    });
+    return await this.client.request<RouterSecretsSuccess>(
+      setRouterSecretQuery,
+      {
+        graphId: this.graphId,
+        name: this.graphVariant,
+        input: {
+          secrets: [key],
+        },
+      } as RouterMutationSetSecretsArgs
+    );
   }
 }
