@@ -1,6 +1,6 @@
 
 provider "google" {
-  project = "secure-subgraph"
+  project = "key-rotator-test-384716"
   region  = "us-central1"
   zone    = "us-central1-c"
 }
@@ -55,7 +55,7 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "archive" {
   name   = "function-source.zip"
   bucket = google_storage_bucket.bucket.name
-  source = "./function-source.zip"
+  source = "../dist/function-source.zip"
 }
 
 resource "google_secret_manager_secret_iam_member" "supergraph_api_key_grant_manager" {
@@ -98,7 +98,7 @@ resource "google_cloudfunctions_function" "main" {
   entry_point                  = "main"
   service_account_email        = google_service_account.key-rotator.email
   environment_variables = {
-    APOLLO_API_URI = "https://graphql.api.apollographql.com/api/graphql"
+    APOLLO_API_URI = "https://api.apollographql.com/graphql"
     GRAPH_ID       = var.graph_id
     GRAPH_VARIANT  = var.graph_variant
     SECRET_NAME    = google_secret_manager_secret.supergraph_api_key.name
